@@ -58,6 +58,24 @@ border:none;color:#fff;
 padding:8px 14px;
 border-radius:10px;
 font-weight:700}
+#dpad{position:fixed;
+bottom:25px;left:50%;
+transform:translateX(-50%);
+display:none;
+grid-template-columns:repeat(3,65px);
+grid-template-rows:repeat(2,65px);
+gap:8px;z-index:15}
+.pad-btn{background:
+rgba(0,255,204,.18);
+border:2px solid #00ffcc;
+color:#00ffcc;
+font-size:1.5rem;
+border-radius:14px;
+display:flex;
+align-items:center;
+justify-content:center}
+.pad-btn:active{
+background:#00ffcc;color:#000}
 </style>
 </head>
 <body>
@@ -80,6 +98,22 @@ NEON SNAKE</button>
 <button class="btn pink"
 onclick="startSpace()">
 SPACE DEFENDER</button>
+</div>
+<div id="dpad">
+<div></div>
+<button class="pad-btn"
+ontouchstart="setD(0,-1)">▲
+</button>
+<div></div>
+<button class="pad-btn"
+ontouchstart="setD(-1,0)">◀
+</button>
+<button class="pad-btn"
+ontouchstart="setD(0,1)">▼
+</button>
+<button class="pad-btn"
+ontouchstart="setD(1,0)">▶
+</button>
 </div>
 <canvas id="c"></canvas>
 <script>
@@ -111,9 +145,15 @@ mode='';
 cancelAnimationFrame(loopId);
 document.getElementById('hud')
 .style.display='none';
+document.getElementById('dpad')
+.style.display='none';
 document.getElementById('menu')
 .style.display='flex';}
 let snk,dir,ndir,food,stmr;
+function setD(x,y){
+if(x!==0&&dir.x===-x)return;
+if(y!==0&&dir.y===-y)return;
+ndir={x:x,y:y};}
 function startSnake(){
 mode='snake';score=0;
 document.getElementById('sc')
@@ -122,9 +162,11 @@ document.getElementById('menu')
 .style.display='none';
 document.getElementById('hud')
 .style.display='flex';
-snk=[{x:10,y:10},{x:9,y:10}];
+document.getElementById('dpad')
+.style.display='grid';
+snk=[{x:8,y:8},{x:7,y:8}];
 dir={x:1,y:0};ndir={x:1,y:0};
-food={x:15,y:15};stmr=0;
+food={x:12,y:12};stmr=0;
 loop();}
 let ship,bul,enm,etmr;
 function startSpace(){
@@ -135,33 +177,33 @@ document.getElementById('menu')
 .style.display='none';
 document.getElementById('hud')
 .style.display='flex';
-ship={x:W/2,y:H-90};
+document.getElementById('dpad')
+.style.display='none';
+ship={x:W/2,y:H-110};
 bul=[];enm=[];etmr=0;
 loop();}
 let tx=0,ty=0;
-c.ontouchstart=e=>{
-tx=e.touches.clientX;
-ty=e.touches.clientY;
-if(mode==='space')ship.x=tx;};
-c.ontouchmove=e=>{
-const x=e.touches.clientX;
-const y=e.touches.clientY;
+c.addEventListener('touchstart',
+e=>{
+e.preventDefault();
+tx=e.touches[0].clientX;
+ty=e.touches[0].clientY;
+if(mode==='space')ship.x=tx;
+},{passive:false});
+c.addEventListener('touchmove',
+e=>{
+e.preventDefault();
+const x=e.touches[0].clientX;
+const y=e.touches[0].clientY;
 if(mode==='space'){ship.x=x;}
 else if(mode==='snake'){
 const dx=x-tx,dy=y-ty;
-if(Math.abs(dx)>25||
-Math.abs(dy)>25){
+if(Math.abs(dx)>20||
+Math.abs(dy)>20){
 if(Math.abs(dx)>Math.abs(dy)){
-if(dx>0&&dir.x!==-1)
-ndir={x:1,y:0};
-else if(dx<0&&dir.x!==1)
-ndir={x:-1,y:0};
-}else{
-if(dy>0&&dir.y!==-1)
-ndir={x:0,y:1};
-else if(dy<0&&dir.y!==1)
-ndir={x:0,y:-1};}
-tx=x;ty=y;}}};
+setD(dx>0?1:-1,0);
+}else{setD(0,dy>0?1:-1);}
+tx=x;ty=y;}}},{passive:false});
 function loop(){
 if(!mode)return;
 ctx.fillStyle='rgba(5,5,10,.35)';
@@ -169,12 +211,12 @@ ctx.fillRect(0,0,W,H);
 if(mode==='snake'){
 const gs=20;
 const cols=Math.floor(W/gs);
-const rows=Math.floor(H/gs);
-if(++stmr>6){
+const rows=Math.floor((H-180)/gs);
+if(++stmr>7){
 stmr=0;dir=ndir;
 const hd={
-x:(snk.x+dir.x+cols)%cols,
-y:(snk.y+dir.y+rows)%rows};
+x:(snk[0].x+dir.x+cols)%cols,
+y:(snk[0].y+dir.y+rows)%rows};
 if(snk.some(s=>
 s.x===hd.x&&s.y===hd.y)){
 alert('Kraj! Bodovi: '+score);
@@ -194,9 +236,9 @@ ctx.fillStyle='#00ffcc';
 snk.forEach(s=>ctx.fillRect(
 s.x*gs+1,s.y*gs+1,gs-2,gs-2));
 }else if(mode==='space'){
-if(++etmr%15===0)
+if(++etmr%14===0)
 bul.push({x:ship.x,y:ship.y-20});
-if(etmr%35===0)
+if(etmr%32===0)
 enm.push({
 x:Math.random()*(W-40)+20,y:-20});
 ctx.fillStyle='#00ffcc';
@@ -218,8 +260,8 @@ if(e.y>H){
 alert('Kraj! Bodovi: '+score);
 return toMenu();}
 bul.forEach((b,bi)=>{
-if(Math.abs(b.x-e.x)<20&&
-Math.abs(b.y-e.y)<20){
+if(Math.abs(b.x-e.x)<22&&
+Math.abs(b.y-e.y)<22){
 enm.splice(ei,1);
 bul.splice(bi,1);
 addScore(20);}});});}
