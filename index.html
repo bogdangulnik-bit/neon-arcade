@@ -14,15 +14,17 @@ content="#05050a">
 *{box-sizing:border-box;
 margin:0;padding:0;
 font-family:sans-serif;
-user-select:none}
+user-select:none;
+-webkit-user-select:none}
 body,html{width:100%;height:100%;
 overflow:hidden;
 background:#05050a;color:#fff;
 touch-action:none}
 canvas{display:block;
-width:100vw;height:100vh}
+width:100vw;height:100vh;
+touch-action:none}
 #menu{position:fixed;inset:0;
-background:rgba(5,5,10,.92);
+background:rgba(5,5,10,.94);
 display:flex;
 flex-direction:column;
 align-items:center;
@@ -62,14 +64,14 @@ font-weight:700}
 bottom:25px;left:50%;
 transform:translateX(-50%);
 display:none;
-grid-template-columns:repeat(3,65px);
-grid-template-rows:repeat(2,65px);
+grid-template-columns:repeat(3,68px);
+grid-template-rows:repeat(2,68px);
 gap:8px;z-index:15}
 .pad-btn{background:
-rgba(0,255,204,.18);
+rgba(0,255,204,.2);
 border:2px solid #00ffcc;
 color:#00ffcc;
-font-size:1.5rem;
+font-size:1.6rem;
 border-radius:14px;
 display:flex;
 align-items:center;
@@ -102,24 +104,21 @@ SPACE DEFENDER</button>
 <div id="dpad">
 <div></div>
 <button class="pad-btn"
-ontouchstart="setD(0,-1)">▲
+onpointerdown="setD(0,-1)">▲
 </button>
 <div></div>
 <button class="pad-btn"
-ontouchstart="setD(-1,0)">◀
+onpointerdown="setD(-1,0)">◀
 </button>
 <button class="pad-btn"
-ontouchstart="setD(0,1)">▼
+onpointerdown="setD(0,1)">▼
 </button>
 <button class="pad-btn"
-ontouchstart="setD(1,0)">▶
+onpointerdown="setD(1,0)">▶
 </button>
 </div>
 <canvas id="c"></canvas>
 <script>
-if('serviceWorker'in navigator){
-navigator.serviceWorker
-.register('sw.js');}
 const c=document.getElementById('c');
 const ctx=c.getContext('2d');
 let W,H,mode='',score=0,loopId;
@@ -182,28 +181,26 @@ document.getElementById('dpad')
 ship={x:W/2,y:H-110};
 bul=[];enm=[];etmr=0;
 loop();}
-let tx=0,ty=0;
-c.addEventListener('touchstart',
-e=>{
-e.preventDefault();
-tx=e.touches[0].clientX;
-ty=e.touches[0].clientY;
-if(mode==='space')ship.x=tx;
-},{passive:false});
-c.addEventListener('touchmove',
-e=>{
-e.preventDefault();
-const x=e.touches[0].clientX;
-const y=e.touches[0].clientY;
+let px=0,py=0,isDown=false;
+c.onpointerdown=e=>{
+isDown=true;
+px=e.clientX;py=e.clientY;
+if(mode==='space')ship.x=px;};
+c.onpointermove=e=>{
+if(!isDown)return;
+const x=e.clientX;
+const y=e.clientY;
 if(mode==='space'){ship.x=x;}
 else if(mode==='snake'){
-const dx=x-tx,dy=y-ty;
-if(Math.abs(dx)>20||
-Math.abs(dy)>20){
+const dx=x-px,dy=y-py;
+if(Math.abs(dx)>22||
+Math.abs(dy)>22){
 if(Math.abs(dx)>Math.abs(dy)){
 setD(dx>0?1:-1,0);
 }else{setD(0,dy>0?1:-1);}
-tx=x;ty=y;}}},{passive:false});
+px=x;py=y;}}};
+window.onpointerup=()=>{
+isDown=false;};
 function loop(){
 if(!mode)return;
 ctx.fillStyle='rgba(5,5,10,.35)';
@@ -211,12 +208,13 @@ ctx.fillRect(0,0,W,H);
 if(mode==='snake'){
 const gs=20;
 const cols=Math.floor(W/gs);
-const rows=Math.floor((H-180)/gs);
+const rows=Math.floor((H-185)/gs);
 if(++stmr>7){
 stmr=0;dir=ndir;
+const head=snk.at(0);
 const hd={
-x:(snk[0].x+dir.x+cols)%cols,
-y:(snk[0].y+dir.y+rows)%rows};
+x:(head.x+dir.x+cols)%cols,
+y:(head.y+dir.y+rows)%rows};
 if(snk.some(s=>
 s.x===hd.x&&s.y===hd.y)){
 alert('Kraj! Bodovi: '+score);
