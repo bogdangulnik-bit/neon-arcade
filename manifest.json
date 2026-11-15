@@ -1,15 +1,30 @@
 {
-  "name": "Neon Arcade",
+  "name": "NeonArcade",
   "short_name": "NeonArcade",
-  "start_url": "index.html",
-  "display": "fullscreen",
-  "background_color": "#05050a",
-  "theme_color": "#05050a",
+  "description": "NeonArcade - kolekcija neon arcade igrica. Igraj direktno na mobitelu.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0a1a",
+  "theme_color": "#0a0a1a",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "https://flaticon.com",
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
